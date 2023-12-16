@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 import requests
+from django.http import JsonResponse
 
 # Словарь перевода значений направления ветра
 DIRECTION_TRANSFORM = {
@@ -47,6 +48,17 @@ def current_weather(lat, lon):
     }
     return result
 
+
+def weather_view(request):
+    if request.method == "GET":
+        lat = request.GET.get('lat')
+        lon = request.GET.get('lon')
+        if lat and lon:
+            data = current_weather(lat=lat, lon=lon)
+        else:
+            data = current_weather(59.93, 30.31)
+        return JsonResponse(data, json_dumps_params={'ensure_ascii': False,
+                                                     'indent': 4})
 
 # if __name__ == "__main__":
 #     print(current_weather(59.93, 30.31))  # Проверка работы для координат Санкт-Петербурга

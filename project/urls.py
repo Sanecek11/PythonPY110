@@ -15,13 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from random import random
 from django.http import HttpResponse
 from app_datetime.views import datetime_view
-from app_weather.views import current_weather
+from app_weather.views import weather_view
 from django.http import JsonResponse
-from app_store.views import products_view, shop_view
 
 
 def random_view(request):
@@ -30,18 +29,10 @@ def random_view(request):
         return HttpResponse(data)
 
 
-def weather_view(request):
-    if request.method == "GET":
-        data = current_weather(59.93, 30.31)
-        return JsonResponse(data, json_dumps_params={'ensure_ascii': False,
-                                                     'indent': 4})
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('random/', random_view),
     path('datetime/', datetime_view),
-    path('weather/', current_weather),
-    path('product/', products_view),
-    path('', shop_view),
+    path('weather/', include('app_weather.urls')),
+    path('', include('app_store.urls')),
 ]
