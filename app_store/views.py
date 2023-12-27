@@ -9,7 +9,6 @@ from logic.services import filtering_category, view_in_cart, add_to_cart, remove
 def cart_view(request):
     if request.method == "GET":
         data = view_in_cart()
-        # TODO Вызвать ответственную за это действие функцию
         return JsonResponse(data, json_dumps_params={'ensure_ascii': False,
                                                      'indent': 4})
 
@@ -17,7 +16,6 @@ def cart_view(request):
 def cart_add_view(request, id_product):
     if request.method == "GET":
         result = add_to_cart(id_product)
-        # TODO Вызвать ответственную за это действие функцию и передать необходимые параметры
         if result:
             return JsonResponse({"answer": "Продукт успешно добавлен в корзину"},
                                 json_dumps_params={'ensure_ascii': False})
@@ -30,7 +28,6 @@ def cart_add_view(request, id_product):
 def cart_del_view(request, id_product):
     if request.method == "GET":
         result = remove_from_cart(id_product)
-        # TODO Вызвать ответственную за это действие функцию и передать необходимые параметры
         if result:
             return JsonResponse({"answer": "Продукт успешно удалён из корзины"},
                                 json_dumps_params={'ensure_ascii': False})
@@ -62,9 +59,7 @@ def products_view(request):
 
 def shop_view(request):
     if request.method == "GET":
-        with open('app_store/shop.html', encoding="utf-8") as f:
-            data = f.read()  # Читаем HTML файл
-        return HttpResponse(data)  # Отправляем HTML файл как ответ
+        return render(request, 'store/shop.html')
 
 
 def products_page_view(request, page):
