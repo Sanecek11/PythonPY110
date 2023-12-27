@@ -26,3 +26,20 @@ def shop_view(request):
         return HttpResponse(data)  # Отправляем HTML файл как ответ
 
 
+def products_page_view(request, page):
+    if request.method == "GET":
+        if isinstance(page, str):
+            for data in DATABASE.values():
+                if data['html'] == page:
+                    with open(f'app_store/products/{page}.html', encoding="utf-8") as file:
+                        content = file.read()
+                    return HttpResponse(content)
+        elif isinstance(page, int):
+            data = DATABASE.get(str(page))
+            if data:
+                with open(f'app_store/products/{data["html"]}.html', encoding="utf-8") as f:
+                    content_1 = f.read()
+                return HttpResponse(content_1)
+        return HttpResponse(status=404)
+
+
