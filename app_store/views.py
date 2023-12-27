@@ -3,20 +3,61 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from .models import DATABASE
+from logic.services import filtering_category, view_in_cart, add_to_cart, remove_from_cart
+
+
+def cart_view(request):
+    if request.method == "GET":
+        data = view_in_cart()
+        # TODO Вызвать ответственную за это действие функцию
+        return JsonResponse(data, json_dumps_params={'ensure_ascii': False,
+                                                     'indent': 4})
+
+
+def cart_add_view(request, id_product):
+    if request.method == "GET":
+        result = add_to_cart(id_product)
+        # TODO Вызвать ответственную за это действие функцию и передать необходимые параметры
+        if result:
+            return JsonResponse({"answer": "Продукт успешно добавлен в корзину"},
+                                json_dumps_params={'ensure_ascii': False})
+
+        return JsonResponse({"answer": "Неудачное добавление в корзину"},
+                            status=404,
+                            json_dumps_params={'ensure_ascii': False})
+
+
+def cart_del_view(request, id_product):
+    if request.method == "GET":
+        result = remove_from_cart(id_product)
+        # TODO Вызвать ответственную за это действие функцию и передать необходимые параметры
+        if result:
+            return JsonResponse({"answer": "Продукт успешно удалён из корзины"},
+                                json_dumps_params={'ensure_ascii': False})
+
+        return JsonResponse({"answer": "Неудачное удаление из корзины"},
+                            status=404,
+                            json_dumps_params={'ensure_ascii': False})
 
 
 def products_view(request):
     if request.method == "GET":
-        product_id = request.GET.get("id")
-        if product_id:
-            product = DATABASE.get(product_id)
-            if product:
-                return JsonResponse(product, json_dumps_params={'ensure_ascii': False, 'indent': 4})
+        if product_id := request.GET.get("id"):
+            if data := DATABASE.get(product_id):
+                return JsonResponse(data, json_dumps_params={'ensure_ascii': False, 'indent': 4})
             else:
                 return HttpResponseNotFound("Данного продукта нет в базе данных")
+            # Обработка фильтрации из параметров запроса
+        category_key = request.GET.get("category")  # Считали 'category'
+        if ordering_key := request.GET.get("ordering"):  # Если в параметрах есть 'ordering'
+            if request.GET.get("reverse").lower() == 'true':  # Если в параметрах есть 'ordering' и 'reverse'=True
+                data = filtering_category(DATABASE, category_key, ordering_key, True)
+            else:  # Если не обнаружили в адресно строке ...&reverse=true , значит reverse=False
+                data = filtering_category(DATABASE, category_key, ordering_key, False)
         else:
-            data = DATABASE
-            return JsonResponse(data, json_dumps_params={'ensure_ascii': False, 'indent': 4})
+            data = filtering_category(DATABASE, category_key)
+        # В этот раз добавляем параметр safe=False, для корректного отображения списка в JSON
+        return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False, 'indent': 4})
 
 
 def shop_view(request):

@@ -19,8 +19,6 @@ from django.urls import path, include
 from random import random
 from django.http import HttpResponse
 from app_datetime.views import datetime_view
-from app_weather.views import weather_view
-from django.http import JsonResponse
 
 
 def random_view(request):
