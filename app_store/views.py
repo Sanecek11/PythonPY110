@@ -14,7 +14,7 @@ def cart_view(request):
                                                          'indent': 4})
         products = []  # Список продуктов
         for product_id, quantity in data['products'].items():
-            product = DATABASE.get(id=product_id)  # 1. Получите информацию о продукте из DATABASE по его product_id. product будет словарём
+            product = DATABASE.get(product_id)  # 1. Получите информацию о продукте из DATABASE по его product_id. product будет словарём
             product["quantity"] = quantity# 2. в словарь product под ключом "quantity" запишите текущее значение товара в корзине
             product[
                 "price_total"] = f"{quantity * product['price_after']:.2f}"  # добавление общей цены позиции с ограничением в 2 знака
