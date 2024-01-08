@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from .models import DATABASE
 from logic.services import filtering_category, view_in_cart, add_to_cart, remove_from_cart
+from django.shortcuts import redirect
 
 
 def cart_view(request):
@@ -90,3 +91,19 @@ def products_page_view(request, page):
         return HttpResponse(status=404)
 
 
+def cart_buy_now_view(request, id_product):
+    if request.method == "GET":
+        result = add_to_cart(id_product)
+        if result:
+            return redirect("app_store:cart_view")
+
+        return HttpResponseNotFound("Неудачное добавление в корзину")
+
+
+def cart_remove_view(request, id_product):
+    if request.method == "GET":
+        result = remove_from_cart(id_product)
+        if result:
+            return redirect("store:cart_view")
+
+        return HttpResponseNotFound("Неудачное удаление из корзины")
