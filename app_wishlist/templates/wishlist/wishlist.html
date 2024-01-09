@@ -33,11 +33,10 @@
            </thead>
            <tbody>
            {% for product in products %}
-              {% if product in favorites %}
              <tr class="text-center">
-               <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
+               <td class="product-remove"><a href="{% url 'app_wishlist:remove' product.id %}"><span class="ion-ios-close"></span></a></td>
                <td class="image-prod"><a href="{{ product.url }}">
-                <div class="img" style="background-image:url({% static product.image_url %});"></div>
+                <div class="img" style="background-image:url({% static product.url %});"></div>
                </a></td>
                <td class="product-name">
                 <h3>{{ product.name }}</h3>
@@ -45,11 +44,12 @@
                </td>
                <td class="price">{{ product.price_total }}</td>
              </tr>
-             {%endif%}
-             <tr>
+           {% endfor %}
+             {%if not products %}
+           <tr>
                <td colspan="4">Ваше избранное пусто</td>
              </tr>
-           {% endfor %}
+           {%endif%}
            </tbody>
          </table>
        </div>

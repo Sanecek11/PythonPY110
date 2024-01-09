@@ -118,7 +118,7 @@ def view_in_wishlist(request) -> dict:  # Уже реализовано, не н
         with open('wishlist.json', encoding='utf-8') as f:
             return json.load(f)
     user = get_user(request).username
-    wishlist = {user: {'products': {}}}  # Создаём пустую корзину
+    wishlist = {user: {'products': []}}  # Создаём пустую корзину
     with open('wishlist.json', mode='x', encoding='utf-8') as f:  # Создаём файл и записываем туда пустую корзину
         json.dump(wishlist, f)
 
@@ -136,15 +136,12 @@ def add_to_wishlist(request, id_product: str) -> bool:
     """
     wishlist_users = view_in_wishlist(request)
     wishlist = wishlist_users[get_user(request).username]
-    if id_product in wishlist['products']:
-        wishlist['products'][id_product] += 1
-    elif id_product in DATABASE:
-        wishlist['products'][id_product] = 1
-    else:
-        return False
-    with open('wishlist.json', 'w', encoding='utf-8') as f:
-        json.dump(wishlist_users, f)
-    return True
+    if id_product not in wishlist['products']:
+        wishlist['products'].append(id_product)
+        with open('wishlist.json', 'w', encoding='utf-8') as f:
+            json.dump(wishlist_users, f)
+        return True
+    return False
 
 
 def remove_from_wishlist(request, id_product: str) -> bool:
@@ -159,11 +156,9 @@ def remove_from_wishlist(request, id_product: str) -> bool:
     wishlist_users = view_in_wishlist(request)
     wishlist = wishlist_users[get_user(request).username]
     if id_product in wishlist['products']:
-        del wishlist['products'][id_product]
-    else:
-        return False
-    with open('wishlist.json', 'w', encoding='utf-8') as f:
-        json.dump(wishlist_users, f)
+        wishlist['products'].remove(id_product)
+        with open('wishlist.json', 'w', encoding='utf-8') as f:
+            json.dump(wishlist_users, f)
     return True
 
 

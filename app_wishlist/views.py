@@ -4,6 +4,7 @@ from django.contrib.auth import get_user
 import json
 from django.http import JsonResponse, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
+from app_store.models import DATABASE
 # Create your views here.
 
 
@@ -14,13 +15,7 @@ def wishlist_view(request):
         with open('wishlist.json', 'r') as f:
             data = json.load(f)[current_user]['products']
 
-        products = []
-        for product in data:
-            product_dict = {}
-            product_dict["id"] = int(product['id'])
-            product_dict['quantity'] = int(product['quantity'])
-            product["price_total"] = f"{int(product['quantity']) * product['price_after']:.2f}"
-            products.append(product)
+        products = [DATABASE.get(product_id) for product_id in data]  # Список продуктов
 
         return render(request, 'wishlist/wishlist.html', context={"products": products})
 
@@ -57,7 +52,7 @@ def wishlist_json(request):
     if request.method == "GET":
         current_user = get_user(request).username
         wishlist_users = view_in_wishlist(request)
-        data = wishlist_users.get(current_user, {}).get('products', {})
+        data = wishlist_users.get(current_user, {})
         if data:
             return JsonResponse(data)
 
@@ -68,7 +63,7 @@ def wishlist_remove_view(request, id_product):
     if request.method == "GET":
         result = remove_from_wishlist(request, id_product)
         if result:
-            return redirect("app_store:wishlist_view")
+            return redirect("app_wishlist:wishlist_view")
 
         return HttpResponseNotFound("Неудачное удаление из корзины")
 

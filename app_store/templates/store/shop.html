@@ -34,7 +34,7 @@
 				{% for products in products %}
     			<div class="col-md-6 col-lg-3 ftco-animate">
     				<div class="product">
-    					<a href="{% url 'app_store:products_page_view' products.html %} class="img-prod">
+    					<a href="{% url 'app_store:products_page_view' products.html %}" class="img-prod">
 						<img class="img-fluid" src="{% static products.url %}" alt="Colorlib Template">
 							{% if products.discount %}
     						<span class="status">{{products.discount}}%</span>
