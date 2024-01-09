@@ -5,11 +5,15 @@ from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from .models import DATABASE
 from logic.services import filtering_category, view_in_cart, add_to_cart, remove_from_cart
 from django.shortcuts import redirect
+from django.contrib.auth import get_user
+from django.contrib.auth.decorators import login_required
 
 
+@login_required(login_url='login:login_view')
 def cart_view(request):
     if request.method == "GET":
-        data = view_in_cart()
+        current_user = get_user(request).username
+        data = view_in_cart(request)[current_user]
         if request.GET.get('format') == 'JSON':
             return JsonResponse(data, json_dumps_params={'ensure_ascii': False,
                                                          'indent': 4})
@@ -17,15 +21,15 @@ def cart_view(request):
         for product_id, quantity in data['products'].items():
             product = DATABASE.get(product_id)  # 1. Получите информацию о продукте из DATABASE по его product_id. product будет словарём
             product["quantity"] = quantity# 2. в словарь product под ключом "quantity" запишите текущее значение товара в корзине
-            product[
-                "price_total"] = f"{quantity * product['price_after']:.2f}"  # добавление общей цены позиции с ограничением в 2 знака
+            product["price_total"] = f"{quantity * product['price_after']:.2f}"  # добавление общей цены позиции с ограничением в 2 знака
             products.append(product)# 3. добавьте product в список products
         return render(request, "store/cart.html", context={"products": products})
 
 
+@login_required(login_url='login:login_view')
 def cart_add_view(request, id_product):
     if request.method == "GET":
-        result = add_to_cart(id_product)
+        result = add_to_cart(request, id_product)
         if result:
             return JsonResponse({"answer": "Продукт успешно добавлен в корзину"},
                                 json_dumps_params={'ensure_ascii': False})
@@ -37,7 +41,7 @@ def cart_add_view(request, id_product):
 
 def cart_del_view(request, id_product):
     if request.method == "GET":
-        result = remove_from_cart(id_product)
+        result = remove_from_cart(request, id_product)
         if result:
             return JsonResponse({"answer": "Продукт успешно удалён из корзины"},
                                 json_dumps_params={'ensure_ascii': False})
@@ -91,9 +95,10 @@ def products_page_view(request, page):
         return HttpResponse(status=404)
 
 
+@login_required(login_url='login:login_view')
 def cart_buy_now_view(request, id_product):
     if request.method == "GET":
-        result = add_to_cart(id_product)
+        result = add_to_cart(request, id_product)
         if result:
             return redirect("app_store:cart_view")
 
@@ -102,8 +107,8 @@ def cart_buy_now_view(request, id_product):
 
 def cart_remove_view(request, id_product):
     if request.method == "GET":
-        result = remove_from_cart(id_product)
+        result = remove_from_cart(request, id_product)
         if result:
-            return redirect("store:cart_view")
+            return redirect("app_store:cart_view")
 
         return HttpResponseNotFound("Неудачное удаление из корзины")
